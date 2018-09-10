@@ -1,0 +1,33 @@
+version: "3.3"
+services:
+  rabbitmq:
+    image: rabbitmq:management
+    hostname: rabbitmqshost
+    ports:
+      - "5672:5672" # JMS Port
+      - "15672:15672" # Management Port - default user:pass = guest:guest
+    networks:
+      rabbit:
+        aliases:
+        - rabbitmqshost
+
+  url-tracker-api:
+    build:
+      context: ./url-tracker-api/
+      dockerfile: Dockerfile
+    image: fourdsight.demo/url-tracker-api
+    links:
+      - rabbitmq
+    ports:
+      - "8081:8080"
+    volumes:
+      - ./phantomjs/bin/phantomjs:/tmp/phantomjs
+    networks:
+      rabbit:
+        aliases:
+        - tracker-api
+    environment:
+      RABBIT_HOST: rabbitmqshost
+
+networks:
+  rabbit:
